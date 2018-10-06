@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>RPG_ScratchPad</groupId>
+  <artifactId>RPG_ScratchPad</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>RPG_ScratchPad</name>
+  <description>Generalist approach for WYSWYG standalone RPG testing/playing</description>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+  	<dependency>
+		<groupId>org.jdom</groupId>
+		<artifactId>jdom2</artifactId>
+		<version>2.0.6</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+	  		<artifactId>commons-lang3</artifactId>
+	  	<version>3.4</version>
+  	</dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,51 @@
+<Scratchpad>
+<RollSettings>
+  <DiceSides>100</DiceSides>
+  <DiceNumber>1</DiceNumber>
+  <RollLabel1>A</RollLabel1>
+  <RollMod1>2</RollMod1>
+  <RollLabel2 />
+  <RollMod2 />
+</RollSettings>
+<ChatBox>
+  <Person>
+    <Name>Test</Name>
+    <Color>101:144:180</Color>
+  </Person>
+</ChatBox>
+<PoiBar>
+  <Config>
+    <LifeSlotName>Lifee</LifeSlotName>
+    <Skill1SlotName>Skill1_</Skill1SlotName>
+    <Skill2SlotName>Skill2_</Skill2SlotName>
+  </Config>
+  <Poi>
+    <Name>Test</Name>
+    <Life>1</Life>
+    <AllModifier>2</AllModifier>
+    <Skill1>3</Skill1>
+    <Skill1Modifier>4</Skill1Modifier>
+    <Skill2>5</Skill2>
+    <Skill2Modifier>6</Skill2Modifier>
+    <Attack>7</Attack>
+    <AttackModifier>8</AttackModifier>
+    <Defense>9</Defense>
+    <DefenseModifier>10</DefenseModifier>
+    <Notes>11</Notes>
+  </Poi>
+  <Poi>
+    <Name>Test2</Name>
+    <Life>11</Life>
+    <AllModifier>22</AllModifier>
+    <Skill1>33</Skill1>
+    <Skill1Modifier>44</Skill1Modifier>
+    <Skill2>55</Skill2>
+    <Skill2Modifier>66</Skill2Modifier>
+    <Attack>77</Attack>
+    <AttackModifier>88</AttackModifier>
+    <Defense>99</Defense>
+    <DefenseModifier>1010</DefenseModifier>
+    <Notes>1111</Notes>
+  </Poi>
+</PoiBar>
+</Scratchpad>
