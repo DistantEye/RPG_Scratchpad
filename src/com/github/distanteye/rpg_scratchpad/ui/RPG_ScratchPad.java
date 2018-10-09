@@ -61,7 +61,8 @@ import com.github.distanteye.rpg_scratchpad.ui.validators.NumericValidator;
 import com.github.distanteye.rpg_scratchpad.wrappers.*;
 
 /**
- * Main UI class organizing application interface for the user
+ * Main UI class organizing application interface for the user. Interfaced to allow for other UI possibilities, but is currently the only one
+ * 
  * @author Vigilant
  *
  */
@@ -110,6 +111,10 @@ public class RPG_ScratchPad implements UI {
 	
 	private PrintStream mainWriter, secondaryWriter;
 	
+	/**
+	 * Creates and initializes the UI, setting up the full layout
+	 * @throws HeadlessException
+	 */
 	public RPG_ScratchPad() throws HeadlessException
 	{
 		String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
@@ -333,6 +338,14 @@ public class RPG_ScratchPad implements UI {
         
 	}
 	
+	/**
+	 * Creates (or recreates) the Poi section of the UI, returning the new y offset based on the number of rows used
+	 * @param parent The Panel that will contain the Poi Section this is creating
+	 * @param y The current y offset of Parent to start adding things at
+	 * @param optionalScroll An optional reference to a scrollbar being used by this section 
+	 * so the scroll position can be updated after (re)initialization is finished
+	 * @return Returns the new y offset based on the original y plus the number of rows used by this method
+	 */
 	protected int renderPoiBar(GBagPanel parent, int y, JScrollPane optionalScroll)
 	{
 		String lifeLabel = "Life";
@@ -392,40 +405,17 @@ public class RPG_ScratchPad implements UI {
 		}
 		
 		return y;
-	}
+	}	
 	
-	protected void rollSelectedPoi(String skill)
-	{
-		String sidesText = numSides.getText();
-		if (!Utils.isInteger(sidesText))
-		{
-			handleError("Invalid number of dice sides!");
-		}
-		
-		int numSides = Integer.parseInt(sidesText);
-		
-		ArrayList<Poi> selectedPois = new ArrayList<Poi>();
-		for (Poi poi : poiList)
-		{
-			if (poi.isSelected()) { selectedPois.add(poi); }
-		}
-		
-		RollInfo[] rInfo = new RollInfo[selectedPois.size()];
-		int idx = 0;
-		
-    	for (Poi poi : selectedPois)
-    	{
-    		String label = "[" + poi.getName() + "] " + poi.getSkillLabel(skill);
-    		int modifier = poi.getSkillValue(skill) + poi.getSkillModifierTotal(skill);
-    		
-    		rInfo[idx++] = new RollInfo(label,
-					numSides,
-					modifier);
-    	}
-    	
-    	rollDice(rInfo, false);
-	}
-	
+	/**
+	 * Creates the table header aspects for the Poi section 
+	 * @param parent The Panel that will contain the Poi subsection this is creating
+	 * @param y The current y offset of Parent to start adding things at
+	 * @param lifeLabel Label for the Poi's life stat
+	 * @param s1Label Label for the first customizable skill for the table display
+	 * @param s2Label Label for the second customizable skill for the table display
+	 * @return Returns the new y offset based on the original y plus the number of rows used by this method
+	 */
 	protected int addPoiHeader(GBagPanel parent, int y, String lifeLabel, String s1Label, String s2Label)
 	{
 		int x = 0;		
@@ -453,8 +443,14 @@ public class RPG_ScratchPad implements UI {
 		poiSkillLabelAccessors.add(new StringWrapper("Defense"));
 		
 		return y+1;
-	}
+	}	
 	
+	/**
+	 * Completes the Poi table with the bottom set of buttons for acting on the Poi set as well as managing the finishing aspects of the section layout
+	 * @param parent The Panel that will contain the Poi subsection this is creating
+	 * @param y The current y offset of Parent to start adding things at
+	 * @return Returns the new y offset based on the original y plus the number of rows used by this method
+	 */
 	protected int addPoiFooter(GBagPanel parent, int y)
 	{
 		int x = 0;
@@ -502,6 +498,14 @@ public class RPG_ScratchPad implements UI {
 		return y+4;
 	}
 	
+	/**
+	 * Adds a row in the table for a particular Poi, filling in values to match the stored values for that object
+	 * @param parent The Panel that will contain the Poi subsection this is creating
+	 * @param y The current y offset of Parent to start adding things at
+	 * @param poi The linked Poi object to use
+	 * @param poiIndex The current row number, starting at 0
+	 * @return Returns the new y offset based on the original y plus the number of rows used by this method
+	 */
 	protected int addPoiRow(GBagPanel parent, int y, Poi poi, int poiIndex)
 	{
 		int x = 0;
@@ -533,6 +537,49 @@ public class RPG_ScratchPad implements UI {
 		return y+1;
 	}
 	
+	/**
+	 * For all Poi with isSelected as true, rolls dice (see RollDice) using the values for Skill specified by the string skill.
+	 * This allows for rolling the same common skill across many actors at once
+	 * @param skill The key of the Skill to roll. This skill should exist but does not need to because of the way Poi.getSkill methods work,
+	 * it would just autocreate the missing Skill
+	 */
+	protected void rollSelectedPoi(String skill)
+	{
+		String sidesText = numSides.getText();
+		if (!Utils.isInteger(sidesText))
+		{
+			handleError("Invalid number of dice sides!");
+		}
+		
+		int numSides = Integer.parseInt(sidesText);
+		
+		ArrayList<Poi> selectedPois = new ArrayList<Poi>();
+		for (Poi poi : poiList)
+		{
+			if (poi.isSelected()) { selectedPois.add(poi); }
+		}
+		
+		RollInfo[] rInfo = new RollInfo[selectedPois.size()];
+		int idx = 0;
+		
+    	for (Poi poi : selectedPois)
+    	{
+    		String label = "[" + poi.getName() + "] " + poi.getSkillLabel(skill);
+    		int modifier = poi.getSkillValue(skill) + poi.getSkillModifierTotal(skill);
+    		
+    		rInfo[idx++] = new RollInfo(label,
+					numSides,
+					modifier);
+    	}
+    	
+    	rollDice(rInfo, false);
+	}	
+	
+	/**
+	 * Rolls 1-2 dice based on the settings in the top right section. 
+	 * The UI allows for configuring number of dice sides, labels, and modifiers.
+	 * This information is then processed to rollDice for use
+	 */
 	protected void rightBarRoll()
 	{
 		String sidesText = numSides.getText();
@@ -560,6 +607,11 @@ public class RPG_ScratchPad implements UI {
     	rollDice(rInfo, false);
 	}
 	
+	/**
+	 * Helper method that matches the redefinable skill labels to the equivalent fixed system keys for that skill
+	 * @param label string containing Label to check against. Currently this will only return useful results for a certain set of values
+	 * @return For Attack|Defense, returns label. For the value inside the skill1Label or skill2Label, returns Skill1/Skill2. Throws error otherwise
+	 */
 	protected String getKeyFromLabel(String label)
 	{
 		if (label.equals("Attack") || label.equals("Defense"))
@@ -579,7 +631,7 @@ public class RPG_ScratchPad implements UI {
 			throw new IllegalArgumentException(label + " not found");
 		}
 	}
-	
+		
 	protected Poi getPoiFromName(String name)
 	{
 		for (Poi p : poiList)
@@ -593,6 +645,11 @@ public class RPG_ScratchPad implements UI {
 		throw new IllegalArgumentException(name + " not found");
 	}
 	
+	/**
+	 * Rolls two dice based on the settings in the middle right section
+	 * This is a quick shortcut for rolling dice skills from two different Poi's against each other, based on selected skils
+	 * The information and options are packaged together then set to rollDice for use and display
+	 */
 	protected void rightBarRollOpposed()
 	{
 		String sidesText = numSides.getText();
@@ -629,10 +686,14 @@ public class RPG_ScratchPad implements UI {
     	rollDice(rInfo, true);
 	}
 	
+	/**
+	 * Rolls dice according to conditions specified in the first argument, sending the results to display in the secondary textbox
+	 * @param rolls An array of RollInfo objects. RollInfo specifies the number of sides for the dice, any modifiers, and what label to display in text output 
+	 * rolls.length is equal to the number of dice to roll.
+	 * @param showDifference If true and rolls.length == 2, will display the difference between the two rolls
+	 */
 	protected void rollDice(RollInfo[] rolls, boolean showDifference)
 	{
-
-
 		// do some kind of highest to lowest sorting? It won't hurt most of the time, and enables Initiative rolls :D
 		// also add some extra attack target dropdown to automate "this person attackrolls that person"
 		
@@ -671,6 +732,10 @@ public class RPG_ScratchPad implements UI {
 			
 	}
 	
+	/**
+	 * Pushes any text in the chatText JTextBox into both logs and the main textbox ouput, applying text coloring and formatting as appropriate.
+	 * The chatAs JComboBox will be used to determine the label for the text output (the name of the person/entity speaking)
+	 */
 	protected void pushText()
 	{
 		String chatAsName = (String)chatAs.getSelectedItem();
@@ -681,7 +746,12 @@ public class RPG_ScratchPad implements UI {
 		appendColoredText(mainOut, newText.toString(), getOrAddColor(newText.name),mainTextSize, mainScroll);
 	}
 	
-	public static ArrayList<String> getKeysComboBoxList(JComboBox<String> box)
+	/**
+	 * Static helper method for accessing the individual stored values in a ComboBox dropdown
+	 * @param box string containing ComboBox to search through
+	 * @return Returns a list of any string values contained in the Combobox
+	 */
+	public static ArrayList<String> getValuesComboBoxList(JComboBox<String> box)
 	{
 		ComboBoxModel<String> model = box.getModel();
 		ArrayList<String> values = new ArrayList<String>();
@@ -694,18 +764,14 @@ public class RPG_ScratchPad implements UI {
 		return values;
 	}
 	
-	public void loadNameComboBoxListInfo(JComboBox<String> box, HashMap<String, Color> input)
-	{
-		for(String key : input.keySet())
-		{
-			getOrAddColor(key, input.get(key));
-			updateComboBoxList(chatAs, key);
-		}
-	}	
-	
+	/**
+	 * Static helper method for adding values to Combobox dropdown : will do nothing if the input to be added already exists
+	 * @param box string containing ComboBox to add to
+	 * @param input valid string to to add to the Combobox dropdown
+	 */
 	public static void updateComboBoxList(JComboBox<String> box, String input)
 	{
-		ArrayList<String> values = getKeysComboBoxList(box);
+		ArrayList<String> values = getValuesComboBoxList(box);
 		
 		if (!values.contains(input))
 		{
@@ -713,6 +779,11 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 	
+	/**
+	 * Overload of updateComboList : adds multiple values to a Combobox dropdown, ignoring any that already exist
+	 * @param box string containing ComboBox to add to
+	 * @param input list of valid strings to to add to the Combobox dropdown
+	 */
 	public static void updateComboBoxList(JComboBox<String> box, ArrayList<String> input)
 	{
 		for(String str : input)
@@ -721,6 +792,12 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 	
+	/**
+	 * Accesses the mapping of string/color pairs, returning the Color that matches the string inputted
+	 * or creates, maps, and returns a new Color if no matching one exists
+	 * @param name Any valid string
+	 * @return Color object tied to the input string
+	 */
 	protected Color getOrAddColor(String name)
 	{
 		if (name == null) { return Color.BLACK; }
@@ -737,6 +814,14 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 	
+	/**
+	 * Accesses the mapping of string/color pairs, returning the Color that matches the string inputted
+	 * or, if no matching Color exists : maps the passed in Color to the string and returns it.
+	 * Note this can be used to violate the normal uniqueness of color values
+	 * @param name Any valid string
+	 * @param newColor Color object to map to the string passed in (if no mapping already exists)
+	 * @return Color object tied to the input string
+	 */
 	protected Color getOrAddColor(String name, Color newColor)
 	{
 		if (name == null) { return Color.BLACK; }
@@ -752,6 +837,11 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 	
+	/**
+	 * Generates a new randomized color, repeating the process as necessary until the result is something not stored in the current
+	 * color/value mappings.
+	 * @return A new Color object of random settings
+	 */
 	protected Color generateNewRandomColor()
 	{
 		int r, g, b;
@@ -766,12 +856,23 @@ public class RPG_ScratchPad implements UI {
 		if (nameColor.containsValue(result))
 		{
 			// grab a new color to preserve uniqueness
+			// this approach will not work on large datasets but the number of name/color pairs in the program
+			// will never reach a high enough number to be a concern
 			return generateNewRandomColor();
 		}
 		
 		return result;
 	}
 	
+	
+	/**
+	 * Adds text with the specified color and font settings to the passed in text pane. If JScrollPane is set, the scrollbar will be advanced as well
+	 * @param pane Valid JTextPane that the text will be outputed to
+	 * @param text Any valid string to be displayed
+	 * @param color Instatiated Color object for the text
+	 * @param fontSize Fontsize for the text to be displayed
+	 * @param optionalScroll Optional JScrollPane reference, if set, will advance the scroll to the end to display the text just added
+	 */
 	public void appendColoredText(JTextPane pane, String text, Color color, int fontSize, JScrollPane optionalScroll) {
         StyledDocument doc = pane.getStyledDocument();
 
@@ -855,6 +956,11 @@ public class RPG_ScratchPad implements UI {
 		
 	}	
 	
+	/**
+	 * Helper class packaging together all the information needed for a dice roll, beyond the roll result itself
+	 * Contains the number of sides of the dice to roll, any modifiers, and an (optional) label to prefix the roll display with
+	 * @author Vigilant	 
+	 */
 	private class RollInfo
 	{
 		public String label;
@@ -870,6 +976,13 @@ public class RPG_ScratchPad implements UI {
 		
 	}
 	
+	/**
+	 * Small class to package together the ability to write to a logfile while retaining an internal store of 
+	 * lines posted so far (stored in the form of "name" + "text", since knowing the name of who said the text can effect display color)
+	 * 
+	 * This should generally be limited to only one instance per text output pane in the UI
+	 * @author Vigilant
+	 */
 	private class LogEnabledText
 	{
 		private ArrayList<NameStringPair> textLines;
@@ -898,6 +1011,11 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 
+	/**
+	 * Structure packaging together text with an optional name for who "said" the text.
+	 * Knowing the name allows later output to reference the nameColor mapping and consistently display named text in the same manner
+	 * @author Vigilant
+	 */
 	private class NameStringPair
 	{
 		public String name;
@@ -921,6 +1039,11 @@ public class RPG_ScratchPad implements UI {
 		
 	}
 	
+	/**
+	 * Structure packaging together the numerical result of a roll and any text to be attached to it when displaying to the user
+	 * @author Vigilant
+	 *
+	 */
 	private class RollStringPair implements Comparable<RollStringPair>
 	{
 		public int value;
@@ -1005,8 +1128,9 @@ public class RPG_ScratchPad implements UI {
 	}
 	
 	/**
-	 * Converts the chracter's data to XML, valid for storing/saving
-	 * @return Returns a String containing an XML representation of all the character's data
+	 * Converts the UI data to XML, valid for storing/saving
+	 * This includes all Pois as well as most labels in text fields and the results of the chatAs box 
+	 * @return Returns a String containing an XML representation of all UI data
 	 */
 	public String getXML()
 	{
@@ -1020,9 +1144,9 @@ public class RPG_ScratchPad implements UI {
 	}
 	
 	/**
-	 * Collects the character's data into a set of XML tags, not enclosed in a greater tag,
+	 * Collects the UI data into a set of XML tags, not enclosed in a greater tag,
 	 * this less subclasses redefine saving while still being able to draw off the superclass
-	 * @return Returns a String containing the character's vital data in a list of XML tags
+	 * @return Returns a String containing the UI vital data in a list of XML tags
 	 */
 	protected String getInnerXML()
 	{
@@ -1099,7 +1223,7 @@ public class RPG_ScratchPad implements UI {
 	}
 	
 	/**
-	 * Discards the character's current data and replaces it with the data encoded into the xml string passed
+	 * Discards the current UI data/display and replaces it with the data encoded into the xml string passed
 	 * @param xml a validly formatted XML string as returned by getXML()
 	 */
 	public void loadXML(String xml)
@@ -1266,18 +1390,11 @@ public class RPG_ScratchPad implements UI {
 		}
 	}
 	
-	public void switchComboBoxSelection(JComboBox<?> selector, int newIdx)
-	{
-		if (selector.getModel().getSize() >= newIdx)
-    	{
-			selector.setSelectedIndex(newIdx-1); // we convert to a 0 based system
-    	}
-		else
-		{
-			this.handleError("Index out of range for combobox");
-		}
-	}	
-	
+	/**
+	 * Action listener meant to work with the chatAs box : 
+	 * when actionPerformed is triggered (based on InputMap), switches the chatAs combobox to select a particular indexed name
+	 * @author Vigilant
+	 */
 	public class ChatAsSwitchAction extends AbstractAction
 	{
 

@@ -19,7 +19,6 @@ import java.util.HashMap;
 public class Poi {
 
 	protected HashMap<String,Skill> skillMap;
-	protected HashMap<String,Skill> skillLabelMap;
 	protected int allModifier;
 	protected int life;
 	protected String notes;
@@ -28,7 +27,7 @@ public class Poi {
 	
 	
 	/**
-	 * 
+	 * Creates a new Poi with all fields set to default values and empty maps
 	 */
 	public Poi() {
 		skillMap = new HashMap<String, Skill>();
@@ -37,11 +36,28 @@ public class Poi {
 		notes = "";
 	}
 	
-	protected void addSkill(String key)
+	/**
+	 * Adds or replaces a Skill to the Poi's mappings. The value and modifier will be zero (even if this is a replace)
+	 * @param key Any valid string. Sensible skill names are preferred by convention but not enforced aside from skill names needing to be unique
+	 * @return A new Skill object with label of key and 0 values for value and modifier
+	 */
+	protected Skill addSkill(String key)
 	{
-		skillMap.put(key, new Skill(key, 0 , 0));
+		if (getAllSkillLabels().contains(key))
+		{
+			throw new IllegalArgumentException("Name is already used by a different skill and must be unique");
+		}
+		
+		Skill result = new Skill(key, 0 , 0);
+		skillMap.put(key, result);
+		return result;
 	}
 	
+	/**
+	 * Retrieves the skill object in the Poi mapped to key if it exists, else creates a default skill mapped to that key
+	 * @param key Any valid string. Sensible skill names are preferred by convention but not enforced
+	 * @return The existing Skill object matching key, if existing, if not, a new Skill object as if addSkill(key) had been called 
+	 */
 	protected Skill getSkill(String key)
 	{
 		if (skillMap.containsKey(key))
@@ -51,18 +67,27 @@ public class Poi {
 		else
 		{
 			// in this context autocreate is more orderly/convenient to do than a reject
-			Skill newSkill = new Skill("",0,0);
-			skillMap.put(key, newSkill);
-			return newSkill;
+			return addSkill(key);
 		}
 	}
 	
+	/**
+	 * Attempts to look up a skill mapped to key and return the Skill name/label. Note that by default label=key, 
+	 * this can be changed later so the return result of the method will not always equal the input. 
+	 * As well, this will autocreate a default Skill if key doesn't reference a default Skill
+	 * @param key Any valid string. Sensible skill names are preferred by convention but not enforced
+	 * @return The existing Skill object matching key's label, if existing. If not, a new default Skill object will be created and its label will be returned 
+	 */
 	public String getSkillLabel(String key)
 	{
 		Skill skill = getSkill(key);
 		return skill.label;
 	}
 	
+	/**
+	 * Returns a List of all mapped Skills' labels. Note as per getSkillLabel, the Skill label is not always equal to the mapped Skill's key
+	 * @return ArrayList of all existing Skills labels
+	 */
 	public ArrayList<String> getAllSkillLabels()
 	{
 		ArrayList<String> res = new ArrayList<String>();
@@ -74,6 +99,11 @@ public class Poi {
 		return res;
 	}
 	
+	/**
+	 * Changes the label for a skill mapped to key (or, if no matching skill exists creates a default skill mapped to that key and acts on it)
+	 * @param key Any valid string. Sensible skill names are preferred by convention but not enforced
+	 * @param value A valid string to change the label to. It cannot be one already in use by a mapped skill (including the Skill mapped to key)
+	 */
 	public void setSkillLabel(String key, String value)
 	{
 		if (!getSkillLabel(key).equals(value) && getAllSkillLabels().contains(value))
@@ -84,6 +114,8 @@ public class Poi {
 		Skill skill = getSkill(key);
 		skill.label = value;
 	}
+	
+	// the rest of methods are simple accessors/mutators that should be self documenting enough
 	
 	public int getSkillValue(String key)
 	{		
@@ -162,7 +194,10 @@ public class Poi {
 		this.name = name;
 	}
 
-
+	/**
+	 * A small container class to capture the minimalist needs for a Skill : a name/label, a value, and a modifier that can offset that value
+	 * @author Vigilant	 *
+	 */
 	private class Skill
 	{
 		public String label;

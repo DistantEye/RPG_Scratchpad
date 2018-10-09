@@ -12,6 +12,10 @@
     <Name>Test</Name>
     <Color>101:144:180</Color>
   </Person>
+  <Person>
+    <Name>Test2</Name>
+    <Color>183:161:130</Color>
+  </Person>
 </ChatBox>
 <PoiBar>
   <Config>
