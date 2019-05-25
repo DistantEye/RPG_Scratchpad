@@ -94,6 +94,19 @@ public class ExtJPanel extends JPanel {
 		cons.gridheight = 1;
 		cons.gridwidth = 1;
 	}
+	
+	/**
+	 * Adds a JComponent to the child list WITHOUT adding it as a direct child to the JComponent
+	 * This is a special escape hatch when another ExtJPanel needs to be added as a child but is wrapped in a non-cooperative element,
+	 * like a an ExtJPanel inside of a JScrollPane being added
+	 * @param comp Component to add to UI
+	 * @return The component added
+	 */
+	public JComponent addSpecialChild(JComponent comp) {				
+		this.children.add(comp);
+		
+		return comp;
+	}
 
 	/**
 	 * Shorthand to add new components to the UI tab

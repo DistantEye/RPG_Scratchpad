@@ -313,6 +313,7 @@ public class RPG_ScratchPad implements UI {
 		bottomScroll.setPreferredSize(new Dimension(900,300));
 		
 		mainPanel.addC(bottomScroll, 0, 8, 6, 12, GridBagConstraints.BOTH);	
+		mainPanel.addSpecialChild(bottomPanel); // the scroll hides bottomPanel from being registered properly by the normal infrastructure
 		
 		renderPoiBar(bottomPanel, 0, bottomScroll);		
 		
