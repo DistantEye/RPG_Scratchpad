@@ -82,9 +82,7 @@ public class RPG_ScratchPad implements UI {
 	protected JTextPane mainOut, secondaryOut;
 	protected JComboBox<String> chatAs;
 	protected JTextField chatText;
-		
-	protected boolean updateEnabled;
-	
+
 	protected HashMap<String, Color> nameColor;
 	
 	protected LogEnabledText fullText;	
@@ -153,9 +151,7 @@ public class RPG_ScratchPad implements UI {
         
         mainWindow.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         
-        mainWindow.add(mainPanel);
-
-        updateEnabled = true;      
+        mainWindow.add(mainPanel);   
 		
 		outputBox = new GBagPanel();
 		//mainPanel.addC(outputBox, 0, 0, 8, 12, GridBagConstraints.RELATIVE);
@@ -916,20 +912,6 @@ public class RPG_ScratchPad implements UI {
 	{	
 		mainPanel.updateAllComps(true);
 	}
-	
-	/**
-	 * Tells the UI to refresh all components, pulling new values from the backend for everything.
-	 * Typically called when the underlying character has had a massive change.
-	 */
-	public void refreshAll()
-	{
-		updateEnabled = false; // we don't want to trigger any updates during this rebuild phase, and listeners CAN trigger
-		
-		mainPanel.refreshAllComps(true);	
-
-		updateEnabled = true;
-		update();
-	}
 
 	@Override
 	public String promptUser(String message, String extraContext) {
@@ -1085,7 +1067,7 @@ public class RPG_ScratchPad implements UI {
 			poiList.remove(poiIdx);
 			
 			renderPoiBar(parent,0, scroll);
-			refreshAll();
+			update();
 		}
 		
 	}
@@ -1330,7 +1312,7 @@ public class RPG_ScratchPad implements UI {
 		}
 		
 		renderPoiBar(bottomPanel, 0, bottomScroll);
-		this.refreshAll();
+		this.update();
 		
 	}
 	
