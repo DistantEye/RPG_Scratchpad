@@ -2,12 +2,15 @@ package com.github.distanteye.rpg_scratchpad.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.DataInputStream;
@@ -106,6 +109,9 @@ public class RPG_ScratchPad implements UI {
 	protected ArrayList<AccessWrapper<String>> poiSkill1LabelAccessors;
 	protected ArrayList<AccessWrapper<String>> poiSkill2LabelAccessors;
 	
+	protected double outputBoxMaxXProp = 0.7458, outputBoxMaxYProp = 0.5769;
+	protected double secondaryOutMaxXProp = 0.2542, secondaryOutMaxYProp = 0.5769;
+	protected double bottomScrollMaxXProp = 1.0, bottomScrollMaxYProp = 0.317;
 	
 	private PrintStream mainWriter, secondaryWriter;
 	
@@ -315,6 +321,35 @@ public class RPG_ScratchPad implements UI {
 		
 		//mainPanel.endVertical(5, 9);
 		
+		// There's strange distortions during text and mouse events that shouldn't be happening since they don't change sizing but are anyways
+		// This enforces strict dimensioning which would appear to help with that
+		mainWindow.getRootPane().addComponentListener(new ComponentAdapter() 
+		{  
+	        public void componentResized(ComponentEvent evt) {
+	            Component c = (Component)evt.getSource();
+	            int width = c.getWidth();
+	            int height = c.getHeight();
+	            
+	            // swing is kinda shoddy at this so we mash commands until it hopefully works
+	            
+	            outputBox.setMinimumSize(new Dimension((int)(width*outputBoxMaxXProp), (int)(height*outputBoxMaxYProp)));
+	            outputBox.setPreferredSize(new Dimension((int)(width*outputBoxMaxXProp), (int)(height*outputBoxMaxYProp)));	            
+	            outputBox.setMaximumSize(new Dimension((int)(width*outputBoxMaxXProp), (int)(height*outputBoxMaxYProp)));
+	            outputBox.setSize(new Dimension((int)(width*outputBoxMaxXProp), (int)(height*outputBoxMaxYProp)));
+	            secondaryOut.setMinimumSize(new Dimension((int)(width*secondaryOutMaxXProp), (int)(height*secondaryOutMaxYProp)));
+	            secondaryOut.setPreferredSize(new Dimension((int)(width*secondaryOutMaxXProp), (int)(height*secondaryOutMaxYProp)));
+	            secondaryOut.setMaximumSize(new Dimension((int)(width*secondaryOutMaxXProp), (int)(height*secondaryOutMaxYProp)));
+	            secondaryOut.setSize(new Dimension((int)(width*secondaryOutMaxXProp), (int)(height*secondaryOutMaxYProp)));
+	            bottomScroll.setMinimumSize(new Dimension((int)(width*bottomScrollMaxXProp), (int)(height*bottomScrollMaxYProp)));
+	            bottomScroll.setPreferredSize(new Dimension((int)(width*bottomScrollMaxXProp), (int)(height*bottomScrollMaxYProp)));
+	            bottomScroll.setMaximumSize(new Dimension((int)(width*bottomScrollMaxXProp), (int)(height*bottomScrollMaxYProp)));
+	            bottomScroll.setSize(new Dimension((int)(width*bottomScrollMaxXProp), (int)(height*bottomScrollMaxYProp)));
+	            
+	            mainWindow.revalidate();
+	            mainWindow.repaint();
+	        }
+		});
+		
 		mainWindow.setSize(1600, 900);
 
 		mainWindow.setVisible(true);
@@ -487,7 +522,8 @@ public class RPG_ScratchPad implements UI {
 			
 		});
 		x++;
-		parent.addButton(x++, y, "Add Line").addActionListener(new PoiAddListener(parent, bottomScroll));
+		parent.addButton(x++, y, "Add Line").addActionListener(new PoiAddListener(parent, bottomScroll, false));
+		parent.addButton(x++, y, "Copy Last").addActionListener(new PoiAddListener(parent, bottomScroll, true));
 		parent.addLabel(0, y+1, ""); 
 		parent.addLabel(0, y+2, ""); 
 		parent.addLabel(0, y+3, ""); // extra padding to help scroll still keep the bottom bar visible
@@ -1075,17 +1111,30 @@ public class RPG_ScratchPad implements UI {
 	private class PoiAddListener implements ActionListener
 	{
 		private GBagPanel parent; 
-		private JScrollPane scroll; 
+		private JScrollPane scroll;
+		private boolean copyLast; 
 		
-		public PoiAddListener(GBagPanel parent, JScrollPane scroll)
+		public PoiAddListener(GBagPanel parent, JScrollPane scroll, boolean copyLast)
 		{
 			this.parent = parent;
 			this.scroll = scroll;
+			this.copyLast = copyLast;
 		}
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			poiList.add(new Poi());
+			Poi newRow = null;
+			if (copyLast && poiList.size() > 0)
+			{
+				Poi lastRow = poiList.get(poiList.size()-1);
+				newRow = new Poi(lastRow);
+			}
+			else
+			{
+				newRow = new Poi();
+			}
+			
+			poiList.add(newRow);
 			renderPoiBar(parent,0, scroll);
 		}
 		

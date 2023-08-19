@@ -37,6 +37,25 @@ public class Poi {
 	}
 	
 	/**
+	 * Clones a new Poi based on old Data
+	 */
+	public Poi(Poi source) {
+		skillMap = new HashMap<String, Skill>();
+		
+		var oldSkillMap = source.skillMap;
+		for (String oldKey : oldSkillMap.keySet())
+		{
+			var oldSkill = oldSkillMap.get(oldKey);
+			skillMap.put(oldKey, new Skill(oldSkill.label, oldSkill.value, oldSkill.modifier));
+		}		
+		
+		allModifier = source.allModifier;
+		life = source.life;
+		name = source.name;
+		notes = source.notes;
+	}
+	
+	/**
 	 * Adds or replaces a Skill to the Poi's mappings. The value and modifier will be zero (even if this is a replace)
 	 * @param key Any valid string. Sensible skill names are preferred by convention but not enforced aside from skill names needing to be unique
 	 * @return A new Skill object with label of key and 0 values for value and modifier
