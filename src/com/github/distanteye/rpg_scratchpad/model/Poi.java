@@ -34,6 +34,7 @@ public class Poi {
 		allModifier = 0;
 		life = 0;
 		notes = "";
+		selected = true;
 	}
 	
 	/**
@@ -53,6 +54,7 @@ public class Poi {
 		life = source.life;
 		name = source.name;
 		notes = source.notes;
+		selected = source.selected;
 	}
 	
 	/**

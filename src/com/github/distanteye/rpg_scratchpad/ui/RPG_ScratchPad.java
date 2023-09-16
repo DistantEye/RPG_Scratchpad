@@ -101,6 +101,7 @@ public class RPG_ScratchPad implements UI {
 	
 	protected int mainTextSize;
 	
+	protected boolean poiSelectedHeader;
 	protected ArrayList<Poi> poiList;
 	protected ArrayList<AccessWrapper<String>> poiNameFieldAccessors;
 	protected ArrayList<AccessWrapper<String>> poiSkillLabelAccessors;
@@ -131,6 +132,7 @@ public class RPG_ScratchPad implements UI {
 			e1.printStackTrace();
 		}
 		
+		poiSelectedHeader = true;
 		poiLifeLabelAccessors = new ArrayList<AccessWrapper<String>>();
 		poiSkill1LabelAccessors = new ArrayList<AccessWrapper<String>>();
 		poiSkill2LabelAccessors = new ArrayList<AccessWrapper<String>>();
@@ -210,15 +212,10 @@ public class RPG_ScratchPad implements UI {
 		
 		
 		rightPanel.endRow(3, 3);
-		
-		//rightPanel.endRow(4, 3);
-		
+				
 		secondaryOut = new JTextPane();
 		secondaryOut.setEditable(false);
-		secondaryOut.setPreferredSize(new Dimension(400, 300));
-		
-		
-		//outputBox.addTextArea(0, 0, 30, 90);
+		secondaryOut.setPreferredSize(new Dimension(400, 300));		
 		
 		secondaryScroll = new JScrollPane(secondaryOut);
 		secondaryScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -414,7 +411,7 @@ public class RPG_ScratchPad implements UI {
 			poiList.add(new Poi());
 		}
 		
-		y = addPoiHeader(parent, y, lifeLabel, skill1Label,skill2Label);
+		y = addPoiHeader(parent, y, lifeLabel, skill1Label,skill2Label, optionalScroll);
 		int i = 0;
 		for (Poi p : poiList)
 		{			
@@ -448,11 +445,14 @@ public class RPG_ScratchPad implements UI {
 	 * @param s2Label Label for the second customizable skill for the table display
 	 * @return Returns the new y offset based on the original y plus the number of rows used by this method
 	 */
-	protected int addPoiHeader(GBagPanel parent, int y, String lifeLabel, String s1Label, String s2Label)
+	protected int addPoiHeader(GBagPanel parent, int y, String lifeLabel, String s1Label, String s2Label, JScrollPane optionalScroll)
 	{
 		int x = 0;		
 		
-		parent.addLabel(x++, y, "");
+		JCheckBox selectedBox = new JCheckBox("",poiSelectedHeader);
+		selectedBox.addActionListener(new AllBoxToggler(poiList,selectedBox, parent, optionalScroll));		
+		parent.addC(selectedBox,x++,y);
+		
 		parent.addLabel(x++, y, "Name");
 		parent.addMappedTF(EditState.NOTFIXED, x++, y, "", "lifeLabel", 6, lifeLabel, null, null, new MassAccessWrapper<String>(poiLifeLabelAccessors)).setInputVerifier(new NonEmptyValidator());
 		parent.addLabel(x++, y, "All Modifier");
@@ -544,7 +544,7 @@ public class RPG_ScratchPad implements UI {
 		int x = 0;
 		EditState nf = EditState.NOTFIXED;
 		
-		JCheckBox selectedBox = new JCheckBox("",true);
+		JCheckBox selectedBox = new JCheckBox("",poi.isSelected());
 		selectedBox.addActionListener(new CheckBoxUpdater(new PoiSelectedWrapper(poi),selectedBox));		
 		parent.addC(selectedBox,x++,y);
 		parent.addMappedTF(nf, x++, y, "", "poiName"+poiIndex, 6, poi.getName(), null, this, new PoiNameWrapper(poi));
@@ -1159,6 +1159,34 @@ public class RPG_ScratchPad implements UI {
 		
 	}
 	
+	private class AllBoxToggler implements ActionListener
+	{
+		private ArrayList<Poi> allPoi;
+		private JCheckBox thisBox;
+		
+		private GBagPanel parent;
+		private JScrollPane scroll; 
+		
+		public AllBoxToggler(ArrayList<Poi> allPoi, JCheckBox thisBox, GBagPanel parent, JScrollPane scroll)
+		{
+			this.allPoi = allPoi;
+			this.thisBox = thisBox;
+			this.parent = parent;
+			this.scroll = scroll;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			for (Poi p : allPoi)
+			{
+				p.setSelected(thisBox.isSelected());
+			}
+			poiSelectedHeader = !poiSelectedHeader;
+			renderPoiBar(parent,0, scroll);			
+		}
+		
+	}
+	
 	/**
 	 * Converts the UI data to XML, valid for storing/saving
 	 * This includes all Pois as well as most labels in text fields and the results of the chatAs box 
@@ -1263,6 +1291,7 @@ public class RPG_ScratchPad implements UI {
 		//this.setToDefaults();
 		
 		Document document = Utils.getXMLDoc(xml);
+		poiSelectedHeader = true;
 		
 		Element root = document.getRootElement();
 		
