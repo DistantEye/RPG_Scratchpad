@@ -30,6 +30,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.AbstractAction;
 import javax.swing.ComboBoxModel;
 import javax.swing.JCheckBox;
@@ -47,6 +50,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
@@ -71,8 +76,8 @@ import com.github.distanteye.rpg_scratchpad.wrappers.*;
  */
 public class RPG_ScratchPad implements UI {
 	private JMenuBar menuBar;
-	private JMenu fileMenu;
-	private JMenuItem save,load;
+	private JMenu fileMenu, helpMenu;
+	private JMenuItem save,load, helpChat;
 	
 	protected JTextArea mainStatus;
 	protected JFrame mainWindow;
@@ -291,6 +296,9 @@ public class RPG_ScratchPad implements UI {
 		chatText.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control 8"), new ChatAsSwitchAction(chatAs, 8));
 		chatText.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("control 9"), new ChatAsSwitchAction(chatAs, 9));
 		
+		// alt c brings up a simple calculator
+		chatText.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("alt C"), new ChatAsCalcAction());
+		
 		
 		mainPanel.addMappedButton(3,7,"Say").addActionListener(new ActionListener() {
 			
@@ -355,15 +363,23 @@ public class RPG_ScratchPad implements UI {
         save = new JMenuItem("Save");
         load = new JMenuItem("Load");
         
+        helpChat = new JMenuItem("ChatBox Shortcuts");
+        
         menuBar = new JMenuBar();
         fileMenu = new JMenu("File");
+        helpMenu = new JMenu("Help");
         fileMenu.setMnemonic(KeyEvent.VK_F);
         fileMenu.add(save);
         fileMenu.add(load);
         menuBar.add(fileMenu);
+        
+        helpMenu.add(helpChat);
+        menuBar.add(helpMenu);
         mainWindow.setJMenuBar(menuBar);
         save.addActionListener(new ClickListener());
         load.addActionListener(new ClickListener());
+        
+        helpChat.addActionListener(new ClickListener());
         
 	}
 	
@@ -1017,6 +1033,7 @@ public class RPG_ScratchPad implements UI {
 		{
 			textLines.add(input);
 			writer.println(input.toString());
+			writer.println(); // spacing
 		}
 		
 		public int size()
@@ -1448,6 +1465,9 @@ public class RPG_ScratchPad implements UI {
 			    	load(chooser.getSelectedFile().getName());
 			    }
 			}
+			else if (e.getSource().equals(helpChat)) {
+				JOptionPane.showMessageDialog(null, "When the chat box is in focus, alt c will try and launch calculator 'calc' command, ctrl 1-9 switches chatAs");
+			}
 		}
 	}
 	
@@ -1477,6 +1497,32 @@ public class RPG_ScratchPad implements UI {
 			else
 			{
 				// silent fail is preferable for this since misskeys may be common
+			}
+		}		
+	}
+	
+	/**
+	 * Action listener meant to work with the chatAs box : 
+	 * when actionPerformed is triggered (based on InputMap), brings up a calculator. This is fragile and probably os specific but better than nothing
+	 * @author Vigilant
+	 */
+	public class ChatAsCalcAction extends AbstractAction
+	{
+
+		private static final long serialVersionUID = 14625L;
+		
+
+		public ChatAsCalcAction()
+		{			
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			Runtime run = Runtime.getRuntime();
+			try {
+				run.exec("calc");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		}		
 	}
