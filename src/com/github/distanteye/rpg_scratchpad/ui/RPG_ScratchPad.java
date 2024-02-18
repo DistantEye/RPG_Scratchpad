@@ -787,12 +787,56 @@ public class RPG_ScratchPad implements UI {
 	 */
 	protected void pushText()
 	{
+		String message = chatText.getText();
+		// intercept some commands and make them do special things rather than run chat text
+		if (message.startsWith("/roll"))
+		{
+			chatBasedRoll(message);
+			return;
+		}
+		// end potential revise section
+		
 		String chatAsName = (String)chatAs.getSelectedItem();
 		updateComboBoxList(chatAs,chatAsName);		
 		
-		NameStringPair newText = new NameStringPair(chatAsName, chatText.getText());
+		NameStringPair newText = new NameStringPair(chatAsName, message);
 		fullText.add(newText);
 		appendColoredText(mainOut, newText.toString(), getOrAddColor(newText.name),mainTextSize, mainScroll);
+	}
+	
+	/**
+	 * Validates then attempts to do a secondary box displayed roll based on a given text command
+	 * @param text String that should match the format of "/roll Label DiceSides Modifier" where Modifier is optional
+	 */
+	protected void chatBasedRoll(String text)
+	{
+		String[] portions = text.split(" ");
+		
+		if (portions.length != 3 && portions.length != 4)
+		{
+			handleError("Wrong number of arguments for /roll Label DiceSides (Modifier)");
+			return;
+		}
+		
+		String label = portions[1];
+		int diceSides, modifier = 0;
+		
+		try {
+			diceSides = Integer.parseInt(portions[2]);
+			if (portions.length == 4)
+			{
+				modifier = Integer.parseInt(portions[3]);
+			}
+		}
+		catch(Exception e) 
+		{
+			handleError(e.getMessage());
+			return;
+		}
+		
+		RollInfo[] rInfo = new RollInfo[1];
+		rInfo[0] = new RollInfo(label, diceSides, modifier);
+		rollDice(rInfo, false);
 	}
 	
 	/**
